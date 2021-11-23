@@ -3,6 +3,21 @@ import styled from "@emotion/styled";
 import { colors, mq } from "../styles";
 import { humanReadableTimeFromSeconds } from "../utils/helpers";
 import { Link } from "@reach/router";
+import { gql, useMutation } from "@apollo/client";
+
+const INCREMENT_TRACK_VIEWS = gql`
+  mutation INCREMENT_TRACK_VIEWS($incrementTrackViewsId: ID!) {
+    incrementTrackViews(id: $incrementTrackViewsId) {
+      code
+      success
+      message
+      track {
+        id
+        numberOfViews
+      }
+    }
+  }
+`;
 /**
  * Track Card component renders basic info in a card format
  * for each track populating the tracks grid homepage.
@@ -10,8 +25,16 @@ import { Link } from "@reach/router";
 const TrackCard = ({ track }) => {
   const { title, thumbnail, author, length, modulesCount, id } = track;
 
+  // https://odyssey.apollographql.com/lift-off-part4/the-usemutation-hook
+  const [incrementTrackViews] = useMutation(INCREMENT_TRACK_VIEWS, {
+    variables: { incrementTrackViewsId: id },
+    onCompleted: (data) => {
+      console.log(data);
+    },
+  });
+
   return (
-    <CardContainer to={`/track/${id}`}>
+    <CardContainer to={`/track/${id}`} onClick={incrementTrackViews}>
       <CardContent>
         <CardImageContainer>
           <CardImage src={thumbnail} alt={title} />

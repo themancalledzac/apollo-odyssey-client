@@ -3,6 +3,8 @@
 
 // A resolver's mission is to populate the data for a field in your schema. YOUR mission is to impoement those resolvers
 // A resolver is a function. It has the SAME NAME as the field that it populates data for. It can fetch data from any data source, then transforms that data into the shape your client requires.
+// resolver function names must match the field name in the schema
+// the Query and Mutation types in the schema should have corresponding keys in the resolvers object
 
 // Resolver functions have a specific signature with 4 optional parameters:
 
@@ -32,6 +34,34 @@ const resolvers = {
       return dataSources.trackAPI.getTrack(id);
     },
   },
+
+  Mutation: {
+    // https://odyssey.apollographql.com/lift-off-part4/resolving-a-mutation-successfully
+    // increment's a track's numberOfViews property
+    // can't immediately return the results of the TrackAPI, as this builds part of the response from the REST operation status, as well as the schema also expecting code, success, and message fields.
+    incrementTrackViews: async (_, { id }, { dataSources }) => {
+      try {
+        const track = await dataSources.trackAPI.incrementTrackViews(id);
+
+        return {
+          code: 200,
+          success: true,
+          message: `Successfully incremented number of views for track ${id}`,
+          track,
+        };
+      } catch (err) {
+        // Here is our error handling
+        // It helps us make our response object fields more dynamic
+        return {
+          code: err.extensions.response.status,
+          success: false,
+          message: err.extensions.response.body,
+          track: null,
+        };
+      }
+    },
+  },
+
   Track: {
     // track type in our schema
     // this time we'll need the parent argument, so let's keep it in the resolver function. we can replace args, and destructure context to access the dataSources
