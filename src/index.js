@@ -5,7 +5,7 @@ import GlobalStyles from "./styles";
 import Pages from "./pages";
 
 const client = new ApolloClient({
-  uri: "http://localhost:4000",
+  uri: "https://apollo-odyssey-server-edens.herokuapp.com/",
   cache: new InMemoryCache(),
 });
 
